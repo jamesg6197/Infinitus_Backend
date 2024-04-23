@@ -31,3 +31,5 @@ pip install -r requirements.txt
 ```
 python manage.py runserver
 ```
+
+Ensure the backend is running at 127.0.0.1 in order for the frontend requests to be sent to the correct IP address
