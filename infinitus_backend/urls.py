@@ -20,6 +20,7 @@ from chat.views import *
 from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
+    path('/', home, name = 'home'),
     path('admin/', admin.site.urls),
     path('register/', RegisterView.as_view(), name = 'auth_register'),
     path('login/', LoginView.as_view(), name = 'auth_login'),

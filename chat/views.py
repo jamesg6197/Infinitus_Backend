@@ -17,6 +17,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from django.contrib.auth import get_user_model # Import your custom form
 from django.contrib.auth.models import User
+from django.shortcuts import render
 
 from .forms import *
 from .models import *
@@ -24,6 +25,9 @@ from dotenv import load_dotenv
 
 from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
+
+def home(request):
+    return render('home.html')
 
 class EmailBackend(ModelBackend):
     def authenticate(self, email, password):
