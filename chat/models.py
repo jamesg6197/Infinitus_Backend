@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 class PDFDocument(models.Model):
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE, null = True)
     title = models.CharField(max_length = 200)
     documentContent = models.TextField(null = True, blank = True)
     embedding = models.TextField()

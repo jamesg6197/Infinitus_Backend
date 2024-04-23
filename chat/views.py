@@ -26,6 +26,7 @@ from .models import *
 from dotenv import load_dotenv
 
 from django.contrib.auth.backends import ModelBackend
+from django.db.models import Q
 
 class EmailBackend(ModelBackend):
     def authenticate(self, email, password, **kwargs):
@@ -171,7 +172,7 @@ def get_similarity_search_structure(text_chunks):
 
 class UploadPDFView(APIView):
     permission_classes = [IsAuthenticated]
-
+    
     def post(self, request):
         try:
             print(request.POST, request.FILES)
@@ -190,41 +191,47 @@ class UploadPDFView(APIView):
         
 class AskQuestion(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def post(self, request):
         try:
-            load_dotenv()
+            load_dotenv()  # Loading environment variables if needed
             data = request.data
             chat_history = ChatMessage.objects.filter(user=request.user).order_by('timestamp')
             chat_response = ''
             user_question = data.get('question')
-            pdfs = PDFDocument.objects.filter(user=request.user)
-            text = " ".join(pdf.documentContent for pdf in pdfs)
-            text_chunks = get_text_chunks(text)
 
+            # Include both user's documents and the default startup playbook
+            pdfs = PDFDocument.objects.filter(
+                Q(user=request.user) | Q(title='Startup Playbook.pdf')
+            )
+            
+            # Concatenate text from all relevant PDFs
+            text = " ".join(pdf.documentContent for pdf in pdfs)
+
+            # Processing the text to form a knowledge base
+            text_chunks = get_text_chunks(text)
             knowledge_base = get_similarity_search_structure(text_chunks)
 
+            # Using the knowledge base to get documents related to the question
             docs = knowledge_base.similarity_search(user_question)
 
+            # Setting up and querying the language model
             llm = OpenAI()
             chain = load_qa_chain(llm, chain_type="stuff")
-
             with get_openai_callback() as cb:
                 response = chain.run(input_documents=docs, question=user_question)
 
             chat_response = response
-            
             chat_message = ChatMessage(user=request.user, message=user_question, answer=chat_response)
-            print(response)
-            
             chat_message.save()
+            
+            # Log the response
+            print(response)
             print(chat_response, chat_history, user_question)
 
+            # Return the chat response and question to the client
             context = {'chat_response': chat_response, 'user_question': user_question}
-
             return Response(context)
         except Exception as e:
             print(e)
-            return Response({'message:': "Received Error!"})
-
-
+            return Response({'message': "Received Error!"})
