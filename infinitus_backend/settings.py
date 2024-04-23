@@ -17,7 +17,7 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Add your React development server URL
+    "http://localhost:3000", "*"  # Add your React development server URL
 ]
 
 # Quick-start development settings - unsuitable for production
@@ -31,7 +31,7 @@ DEBUG = True
 
 CORS_ORIGIN_ALLOW_ALL = DEBUG
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.vercel.app']
 
 
 # Application definition

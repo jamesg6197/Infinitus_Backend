@@ -4,9 +4,6 @@ from django.http import JsonResponse
 
 from langchain_community.llms.openai import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.memory import ConversationBufferMemory
-from langchain.chains.conversational_retrieval.base import ConversationalRetrievalChain
-from langchain_community.chat_models import ChatOpenAI
 from langchain.embeddings.openai import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
@@ -29,7 +26,7 @@ from django.contrib.auth.backends import ModelBackend
 from django.db.models import Q
 
 class EmailBackend(ModelBackend):
-    def authenticate(self, email, password, **kwargs):
+    def authenticate(self, email, password):
         UserModel = get_user_model()
         try:
             user = UserModel.objects.get(email=email)
@@ -227,9 +224,7 @@ class AskQuestion(APIView):
             
             # Log the response
             print(response)
-            print(chat_response, chat_history, user_question)
 
-            # Return the chat response and question to the client
             context = {'chat_response': chat_response, 'user_question': user_question}
             return Response(context)
         except Exception as e:
